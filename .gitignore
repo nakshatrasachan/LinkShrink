@@ -1,0 +1,18 @@
+# Dependencies
+/node_modules
+
+# Environment Variables
+# Never commit your secrets!
+.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# Optional: Build output folder
+/dist
+/build
