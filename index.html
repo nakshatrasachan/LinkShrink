@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkShrink | URL Shortener</title>
+    <style>
+        /* --- Basic Styles --- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+
+        /* --- Main Container --- */
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 25px;
+        }
+
+        /* --- Form Elements --- */
+        .url-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .url-input {
+            width: calc(100% - 24px); /* Account for padding */
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .url-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+        }
+
+        .submit-btn {
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .submit-btn:hover {
+            background-color: #0056b3;
+        }
+
+        /* --- Result Area --- */
+        .result-area {
+            margin-top: 25px;
+            padding: 12px;
+            border-radius: 8px;
+            word-wrap: break-word;
+            font-size: 16px;
+            min-height: 20px;
+        }
+
+        .result-success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .result-success a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .result-error {
+            background-color: #ffebee;
+            color: #c62828;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>LinkShrink</h1>
+        <form class="url-form" id="urlForm">
+            <input 
+                type="url" 
+                id="longUrlInput" 
+                class="url-input" 
+                placeholder="Enter your long URL here..." 
+                required
+            >
+            <button type="submit" class="submit-btn">Shorten URL</button>
+        </form>
+        <div class="result-area" id="resultArea"></div>
+    </div>
+
+    <script>
+        // Get the form and result elements from the DOM
+        const urlForm = document.getElementById('urlForm');
+        const longUrlInput = document.getElementById('longUrlInput');
+        const resultArea = document.getElementById('resultArea');
+
+        // Listen for the form submission event
+        urlForm.addEventListener('submit', async (event) => {
+            // Prevent the default form behavior (page reload)
+            event.preventDefault();
+
+            const longUrl = longUrlInput.value;
+            const apiUrl = 'http://localhost:3000/api/v1/shorten';
+
+            // Clear previous results
+            resultArea.innerHTML = '';
+            resultArea.className = 'result-area';
+
+            try {
+                // Make the API call to the backend
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ long_url: longUrl }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // --- Handle Success ---
+                    resultArea.classList.add('result-success');
+                    resultArea.innerHTML = `
+                        Short URL: <a href="${data.short_url}" target="_blank">${data.short_url}</a>
+                    `;
+                } else {
+                    // --- Handle API Error ---
+                    resultArea.classList.add('result-error');
+                    resultArea.textContent = data.error || 'An unknown error occurred.';
+                }
+            } catch (error) {
+                // --- Handle Network Error ---
+                console.error('Fetch error:', error);
+                resultArea.classList.add('result-error');
+                resultArea.textContent = 'Could not connect to the server. Is it running?';
+            }
+        });
+    </script>
+
+</body>
+</html>
